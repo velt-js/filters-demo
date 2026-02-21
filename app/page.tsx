@@ -49,8 +49,9 @@ function VeltDocumentSetup() {
 // Filter controls — uses useVeltClient to
 // get the comment element for filtering.
 // ──────────────────────────────────────────
-function FilterControls({ loggedIn, onLog }: {
+function FilterControls({ loggedIn, currentUser, onLog }: {
   loggedIn: boolean;
+  currentUser: typeof ALL_USERS[number] | null;
   onLog: (msg: string, type: LogEntry['type']) => void;
 }) {
   const { client } = useVeltClient();
@@ -71,11 +72,15 @@ function FilterControls({ loggedIn, onLog }: {
     commentElement.openCommentSidebar();
     onLog('Sidebar opened (required for DOM filtering to work)', 'info');
 
-    const peopleFilter = FILTERED_USERS.map(u => ({
+    const baseFilter = FILTERED_USERS.map(u => ({
       userId: u.userId,
       email: u.email,
       name: u.name,
     }));
+
+    const peopleFilter = currentUser && !baseFilter.some(u => u.userId === currentUser.userId)
+      ? [...baseFilter, { userId: currentUser.userId, email: currentUser.email, name: currentUser.name }]
+      : baseFilter;
 
     commentElement.setCommentSidebarFilters({ people: peopleFilter });
     onLog(`Sidebar filter set for ${peopleFilter.length} users: ${peopleFilter.map(u => u.name).join(', ')}`, 'info');
@@ -167,7 +172,7 @@ export default function Home() {
     : undefined;
 
   return (
-    <VeltProvider apiKey="6xTcUFtlYAlCdh11zrKB" authProvider={authProvider}>
+    <VeltProvider apiKey="Lm7A9zERsCFPT8yfUf0w" authProvider={authProvider}>
       <VeltComments />
 
       {/* Document setup — only rendered after login (auth is via authProvider) */}
@@ -177,7 +182,7 @@ export default function Home() {
       <div className="header-bar">
         <div className="header-title">Comment User Filter Demo</div>
         <div className="header-actions">
-          <FilterControls loggedIn={!!loggedInUser} onLog={log} />
+          <FilterControls loggedIn={!!loggedInUser} currentUser={loggedInUser} onLog={log} />
           <button className="header-button" onClick={() => setShowModal(true)}>
             Login
           </button>
@@ -241,7 +246,7 @@ export default function Home() {
               <div className="panel-title">All 10 Users (each adds a comment)</div>
               <div className="panel-description">
                 Green = included in filter (5 users) | Red = excluded from filter (5 users).
-                After login, click &quot;Apply Filter&quot; to filter comments by the green users only.
+                After login, click &quot;Apply Filter&quot; to filter comments by the green users plus yourself.
               </div>
               <div className="user-grid">
                 {ALL_USERS.map(user => {
@@ -263,14 +268,14 @@ export default function Home() {
               <div className="panel-title">Comment Area</div>
               <div className="panel-description">
                 This is the area where comments are placed on the DOM. Use the Velt comment tool to add comments.
-                When filtering is applied, only comments from the 5 selected users will be visible both on the DOM and in the sidebar.
+                When filtering is applied, only comments from the 5 selected users and the currently logged-in user will be visible both on the DOM and in the sidebar.
               </div>
               <div className="comment-area" id="commentArea">
                 <VeltCommentTool targetCommentElementId="commentArea" />
                 <p><strong>How to test:</strong></p>
                 <p>1. Login as each of the 10 users (one at a time) and leave a comment on this area.</p>
                 <p>2. After all 10 users have commented, login as any user and click &quot;Apply Filter&quot;.</p>
-                <p>3. Only comments from the 5 filtered users (user-1 through user-5) will be visible.</p>
+                <p>3. Comments from the 5 filtered users (user-1 through user-5) plus your own will be visible.</p>
                 <p>4. Click &quot;Clear Filter&quot; to show all comments again.</p>
                 <p>&nbsp;</p>
                 <p>The filter uses two mechanisms together:</p>

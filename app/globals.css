@@ -18,6 +18,11 @@ body {
   flex: 1;
 }
 
+.page-wrapper > velt-comments-sidebar {
+  width: 400px;
+  min-width: 400px;
+}
+
 .content-wrapper {
   flex: 1;
   display: flex;
