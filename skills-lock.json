@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "skills": {
+    "velt-comments-best-practices": {
+      "source": "velt-js/agent-skills",
+      "sourceType": "github",
+      "computedHash": "b440b7e080d7bab16a792399cd94823ffe03041fae450caa00accc07a459522a"
+    },
+    "velt-crdt-best-practices": {
+      "source": "velt-js/agent-skills",
+      "sourceType": "github",
+      "computedHash": "be9056d241759aae93711b142b2942062c43f2a0a1e1af4fa3e9f70371b61318"
+    },
+    "velt-notifications-best-practices": {
+      "source": "velt-js/agent-skills",
+      "sourceType": "github",
+      "computedHash": "175fc7c6d18dabc16420c005d1f9020cf0115fffc3e10ba89be80b4a5d0a9463"
+    },
+    "velt-setup-best-practices": {
+      "source": "velt-js/agent-skills",
+      "sourceType": "github",
+      "computedHash": "2f15b2643dd15c6563cf91d047419c4604f74d6332f9ad88f75084524ee50fc5"
+    }
+  }
+}

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Velt Comment User Filter Demo</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <script async src="http://127.0.0.1:8080/elements/elements.js"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Poppins', sans-serif;
+      background: #f5f7fa;
+      min-height: 100vh;
+      color: #2d3748;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .page-wrapper {
+      display: flex;
+      flex: 1;
+    }
+
+    .content-wrapper {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .header-bar {
+      background: white;
+      padding: 12px 24px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      height: 60px;
+    }
+
+    .header-title {
+      font-size: 18px;
+      font-weight: 600;
+      color: #1a202c;
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .header-button {
+      padding: 8px 16px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 13px;
+      font-weight: 500;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .header-button:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .header-button:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .header-button.danger {
+      background: #e53e3e;
+    }
+
+    .header-button.success {
+      background: #38a169;
+    }
+
+    .main-content {
+      padding: 24px;
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+    }
+
+    .panel {
+      background: white;
+      border-radius: 12px;
+      padding: 24px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+      margin-bottom: 24px;
+    }
+
+    .panel-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1a202c;
+      margin-bottom: 16px;
+    }
+
+    .panel-description {
+      font-size: 13px;
+      color: #718096;
+      margin-bottom: 16px;
+      line-height: 1.5;
+    }
+
+    /* User grid */
+    .user-grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .user-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 12px 8px;
+      border: 2px solid #e2e8f0;
+      border-radius: 8px;
+      font-size: 12px;
+      text-align: center;
+      transition: all 0.2s;
+    }
+
+    .user-card.in-filter {
+      border-color: #38a169;
+      background: #f0fff4;
+    }
+
+    .user-card.not-in-filter {
+      border-color: #e53e3e;
+      background: #fff5f5;
+      opacity: 0.6;
+    }
+
+    .user-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+    }
+
+    .user-card-name {
+      font-weight: 500;
+      color: #2d3748;
+    }
+
+    .user-card-id {
+      font-size: 10px;
+      color: #a0aec0;
+    }
+
+    .user-card-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 10px;
+    }
+
+    .user-card.in-filter .user-card-badge {
+      background: #c6f6d5;
+      color: #22543d;
+    }
+
+    .user-card.not-in-filter .user-card-badge {
+      background: #fed7d7;
+      color: #742a2a;
+    }
+
+    /* Comment area */
+    .comment-area {
+      position: relative;
+      min-height: 400px;
+      background: linear-gradient(135deg, #f5f7fa 0%, #e9ecef 100%);
+      border-radius: 8px;
+      padding: 24px;
+    }
+
+    .comment-area p {
+      font-size: 14px;
+      line-height: 1.8;
+      color: #4a5568;
+      margin-bottom: 16px;
+    }
+
+    /* Status log */
+    .status-log {
+      background: #1a202c;
+      color: #a0aec0;
+      border-radius: 8px;
+      padding: 16px;
+      font-family: 'Courier New', monospace;
+      font-size: 12px;
+      max-height: 200px;
+      overflow-y: auto;
+      line-height: 1.6;
+    }
+
+    .status-log .log-entry {
+      margin-bottom: 4px;
+    }
+
+    .status-log .log-entry.success {
+      color: #68d391;
+    }
+
+    .status-log .log-entry.info {
+      color: #63b3ed;
+    }
+
+    .status-log .log-entry.warn {
+      color: #fbd38d;
+    }
+
+    .status-log .log-entry.error {
+      color: #fc8181;
+    }
+
+    /* Login modal */
+    .modal-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 2000;
+    }
+
+    .modal-overlay.hidden {
+      display: none;
+    }
+
+    .modal {
+      background: white;
+      border-radius: 12px;
+      padding: 32px;
+      width: 90%;
+      max-width: 420px;
+    }
+
+    .modal-title {
+      font-size: 20px;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .modal-section {
+      margin-bottom: 16px;
+    }
+
+    .modal-label {
+      font-size: 12px;
+      font-weight: 500;
+      color: #718096;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin-bottom: 6px;
+    }
+
+    .select-box {
+      width: 100%;
+      padding: 10px 12px;
+      border: 2px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 14px;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer;
+      background: white;
+    }
+
+    .select-box:focus {
+      outline: none;
+      border-color: #4299e1;
+    }
+
+    .modal-button {
+      width: 100%;
+      padding: 12px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 14px;
+      font-weight: 500;
+      font-family: 'Poppins', sans-serif;
+      cursor: pointer;
+      margin-top: 8px;
+    }
+
+    .modal-button:disabled {
+      background: #cbd5e0;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- Header -->
+  <div class="header-bar">
+    <div class="header-title">Comment User Filter Demo</div>
+    <div class="header-actions">
+      <button class="header-button" id="applyFilterBtn" disabled onclick="applyUserFilter()">
+        Apply Filter (5 users)
+      </button>
+      <button class="header-button danger" id="clearFilterBtn" disabled onclick="clearFilter()">
+        Clear Filter
+      </button>
+      <button class="header-button" id="loginBtn" onclick="showLoginModal()">
+        Login
+      </button>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div class="modal-overlay" id="loginModal">
+    <div class="modal">
+      <div class="modal-title">Login to Velt</div>
+
+      <div class="modal-section">
+        <div class="modal-label">Login as User</div>
+        <select class="select-box" id="userSelect" onchange="onUserSelect(this.value)">
+          <option value="">Select a user...</option>
+        </select>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Organization</div>
+        <select class="select-box" id="orgSelect" onchange="onOrgSelect(this.value)">
+          <option value="">Select organization...</option>
+        </select>
+      </div>
+
+      <div class="modal-section">
+        <div class="modal-label">Document</div>
+        <select class="select-box" id="docSelect" onchange="onDocSelect(this.value)">
+          <option value="">Select document...</option>
+        </select>
+      </div>
+
+      <button class="modal-button" id="modalLoginBtn" disabled onclick="handleLogin()">Login</button>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="page-wrapper">
+    <div class="content-wrapper">
+      <div class="main-content">
+
+        <!-- User Overview Panel -->
+        <div class="panel">
+          <div class="panel-title">All 10 Users (each adds a comment)</div>
+          <div class="panel-description">
+            Green = included in filter (5 users) | Red = excluded from filter (5 users).
+            After login, click "Apply Filter" to filter comments by the green users only.
+          </div>
+          <div class="user-grid" id="userGrid"></div>
+        </div>
+
+        <!-- Comment Target Area -->
+        <div class="panel">
+          <div class="panel-title">Comment Area</div>
+          <div class="panel-description">
+            This is the area where comments are placed on the DOM. Use the Velt comment tool to add comments.
+            When filtering is applied, only comments from the 5 selected users will be visible both on the DOM and in the sidebar.
+          </div>
+          <div class="comment-area" id="commentArea">
+            <velt-comment-tool target-comment-element-id="commentArea"></velt-comment-tool>
+            <p><strong>How to test:</strong></p>
+            <p>1. Login as each of the 10 users (one at a time) and leave a comment on this area.</p>
+            <p>2. After all 10 users have commented, login as any user and click "Apply Filter".</p>
+            <p>3. Only comments from the 5 filtered users (user-1 through user-5) will be visible.</p>
+            <p>4. Click "Clear Filter" to show all comments again.</p>
+            <p>&nbsp;</p>
+            <p>The filter uses two mechanisms together:</p>
+            <p>- <code>setCommentSidebarFilters({ people: [...] })</code> to filter the sidebar</p>
+            <p>- <code>enableFilterCommentsOnDom()</code> to sync DOM visibility with the sidebar filter</p>
+          </div>
+        </div>
+
+        <!-- Status Log -->
+        <div class="panel">
+          <div class="panel-title">Status Log</div>
+          <div class="status-log" id="statusLog">
+            <div class="log-entry info">Ready. Please login to start.</div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Sidebar -->
+    <velt-comments-sidebar embed-mode="true"></velt-comments-sidebar>
+  </div>
+
+  <!-- Velt Components -->
+  <velt-root></velt-root>
+  <velt-comments></velt-comments>
+
+  <script>
+    // ──────────────────────────────────────────
+    // 10 users: user-1 to user-10
+    // ──────────────────────────────────────────
+    const ALL_USERS = [
+      { userId: 'user-1',  name: 'Alice Johnson',   email: 'alice@example.com',    photoUrl: 'https://placehold.co/400x400/667eea/fff?text=A',  color: '#667eea' },
+      { userId: 'user-2',  name: 'Bob Smith',       email: 'bob@example.com',      photoUrl: 'https://placehold.co/400x400/764ba2/fff?text=B',  color: '#764ba2' },
+      { userId: 'user-3',  name: 'Charlie Brown',   email: 'charlie@example.com',  photoUrl: 'https://placehold.co/400x400/f093fb/fff?text=C',  color: '#f093fb' },
+      { userId: 'user-4',  name: 'Diana Prince',    email: 'diana@example.com',    photoUrl: 'https://placehold.co/400x400/4facfe/fff?text=D',  color: '#4facfe' },
+      { userId: 'user-5',  name: 'Ethan Hunt',      email: 'ethan@example.com',    photoUrl: 'https://placehold.co/400x400/43e97b/fff?text=E',  color: '#43e97b' },
+      { userId: 'user-6',  name: 'Fiona Gallagher', email: 'fiona@example.com',    photoUrl: 'https://placehold.co/400x400/f5576c/fff?text=F',  color: '#f5576c' },
+      { userId: 'user-7',  name: 'George Lucas',    email: 'george@example.com',   photoUrl: 'https://placehold.co/400x400/feca57/fff?text=G',  color: '#feca57' },
+      { userId: 'user-8',  name: 'Hannah Montana',  email: 'hannah@example.com',   photoUrl: 'https://placehold.co/400x400/ff6b6b/fff?text=H',  color: '#ff6b6b' },
+      { userId: 'user-9',  name: 'Ivan Drago',      email: 'ivan@example.com',     photoUrl: 'https://placehold.co/400x400/a29bfe/fff?text=I',  color: '#a29bfe' },
+      { userId: 'user-10', name: 'Julia Roberts',   email: 'julia@example.com',    photoUrl: 'https://placehold.co/400x400/fd79a8/fff?text=J',  color: '#fd79a8' },
+    ];
+
+    // The 5 users whose comments we want to SHOW
+    const FILTERED_USERS = ALL_USERS.slice(0, 5); // user-1 through user-5
+    const FILTERED_USER_IDS = new Set(FILTERED_USERS.map(u => u.userId));
+
+    const organizations = [
+      { id: 'org-1', name: 'Acme Corporation', organizationId: 'org-1' },
+    ];
+
+    const documents = [
+      { id: 'doc-filter-test', name: 'Filter Test Doc', documentId: 'doc-filter-test' },
+    ];
+
+    let selectedUser = null;
+    let selectedOrg = organizations[0];
+    let selectedDoc = documents[0];
+    let veltInitialized = false;
+    let filterApplied = false;
+
+    // ──────────────────────────────────────────
+    // Render user grid
+    // ──────────────────────────────────────────
+    function renderUserGrid() {
+      const grid = document.getElementById('userGrid');
+      grid.innerHTML = ALL_USERS.map(user => {
+        const inFilter = FILTERED_USER_IDS.has(user.userId);
+        return `
+          <div class="user-card ${inFilter ? 'in-filter' : 'not-in-filter'}">
+            <img class="user-avatar" src="${user.photoUrl}" alt="${user.name}">
+            <div class="user-card-name">${user.name}</div>
+            <div class="user-card-id">${user.userId}</div>
+            <div class="user-card-badge">${inFilter ? 'SHOW' : 'HIDE'}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    // ──────────────────────────────────────────
+    // Logging
+    // ──────────────────────────────────────────
+    function log(message, type = 'info') {
+      const logEl = document.getElementById('statusLog');
+      const entry = document.createElement('div');
+      entry.className = `log-entry ${type}`;
+      const time = new Date().toLocaleTimeString();
+      entry.textContent = `[${time}] ${message}`;
+      logEl.appendChild(entry);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    // ──────────────────────────────────────────
+    // Login modal
+    // ──────────────────────────────────────────
+    function showLoginModal() {
+      document.getElementById('loginModal').classList.remove('hidden');
+    }
+
+    function hideLoginModal() {
+      document.getElementById('loginModal').classList.add('hidden');
+    }
+
+    function onUserSelect(value) {
+      selectedUser = ALL_USERS.find(u => u.userId === value) || null;
+      updateModalButton();
+    }
+
+    function onOrgSelect(value) {
+      selectedOrg = organizations.find(o => o.id === value) || null;
+      updateModalButton();
+    }
+
+    function onDocSelect(value) {
+      selectedDoc = documents.find(d => d.id === value) || null;
+      updateModalButton();
+    }
+
+    function updateModalButton() {
+      document.getElementById('modalLoginBtn').disabled = !(selectedUser && selectedOrg && selectedDoc);
+    }
+
+    // ──────────────────────────────────────────
+    // Populate dropdowns
+    // ──────────────────────────────────────────
+    function populateDropdowns() {
+      const userSelect = document.getElementById('userSelect');
+      ALL_USERS.forEach(user => {
+        const opt = document.createElement('option');
+        opt.value = user.userId;
+        opt.textContent = `${user.name} (${user.userId})`;
+        userSelect.appendChild(opt);
+      });
+
+      const orgSelect = document.getElementById('orgSelect');
+      organizations.forEach(org => {
+        const opt = document.createElement('option');
+        opt.value = org.id;
+        opt.textContent = org.name;
+        orgSelect.appendChild(opt);
+      });
+      // Pre-select the single org
+      orgSelect.value = organizations[0].id;
+
+      const docSelect = document.getElementById('docSelect');
+      documents.forEach(doc => {
+        const opt = document.createElement('option');
+        opt.value = doc.id;
+        opt.textContent = doc.name;
+        docSelect.appendChild(opt);
+      });
+      // Pre-select the single doc
+      docSelect.value = documents[0].id;
+
+      updateModalButton();
+    }
+
+    // ──────────────────────────────────────────
+    // Velt initialization
+    // ──────────────────────────────────────────
+    const rootEl = document.querySelector('velt-root');
+    if (rootEl) {
+      rootEl.addEventListener('getSnippyly', (event) => {
+        window.Velt = event.detail;
+        window.snippyly = event.detail;
+        log('Velt SDK loaded and ready', 'success');
+      });
+    }
+
+    async function initializeVelt() {
+      await window.Velt.initConfig('4L19xGGmbKlWSkKKVHzI', {
+        debugMode: false,
+        usePrefersColorScheme: false,
+      });
+
+      await window.Velt.setDocuments([{
+        id: selectedDoc.documentId,
+        name: selectedDoc.name,
+      }]);
+
+      await window.Velt.identify({
+        userId: selectedUser.userId,
+        name: selectedUser.name,
+        email: selectedUser.email,
+        photoUrl: selectedUser.photoUrl,
+        organizationId: selectedOrg.organizationId,
+      });
+
+      await window.Velt.setDocumentId(selectedDoc.documentId);
+
+      veltInitialized = true;
+    }
+
+    async function handleLogin() {
+      if (!selectedUser || !selectedOrg || !selectedDoc) return;
+
+      const btn = document.getElementById('modalLoginBtn');
+      btn.disabled = true;
+      btn.textContent = 'Logging in...';
+
+      try {
+        if (!window.Velt) {
+          throw new Error('Velt SDK not loaded yet. Please wait and try again.');
+        }
+
+        await initializeVelt();
+
+        log(`Logged in as ${selectedUser.name} (${selectedUser.userId})`, 'success');
+
+        // Enable buttons
+        document.getElementById('applyFilterBtn').disabled = false;
+        document.getElementById('clearFilterBtn').disabled = false;
+
+        hideLoginModal();
+      } catch (err) {
+        log(`Login failed: ${err.message}`, 'error');
+      } finally {
+        btn.textContent = 'Login';
+        btn.disabled = false;
+      }
+    }
+
+    // ──────────────────────────────────────────
+    // Filter logic
+    // ──────────────────────────────────────────
+    function applyUserFilter() {
+      if (!veltInitialized) {
+        log('Please login first', 'warn');
+        return;
+      }
+
+      const commentElement = window.Velt.getCommentElement();
+      if (!commentElement) {
+        log('Comment element not available', 'error');
+        return;
+      }
+
+      // 1. Open the sidebar — filterCommentsOnDom requires sidebarVisible=true
+      //    (the DOM filter is gated on the sidebar being open and actively rendering)
+      commentElement.openCommentSidebar();
+      log('Sidebar opened (required for DOM filtering to work)', 'info');
+
+      // 2. Set sidebar filter to show only the 5 selected users
+      const peopleFilter = FILTERED_USERS.map(u => ({
+        userId: u.userId,
+        email: u.email,
+        name: u.name,
+      }));
+
+      commentElement.setCommentSidebarFilters({
+        people: peopleFilter,
+      });
+
+      log(`Sidebar filter set for ${peopleFilter.length} users: ${peopleFilter.map(u => u.name).join(', ')}`, 'info');
+
+      // 3. Enable filterCommentsOnDom so DOM pins match sidebar
+      commentElement.enableFilterCommentsOnDom();
+
+      log('filterCommentsOnDom enabled - DOM now synced with sidebar filter', 'success');
+      log('Only comments from user-1 through user-5 should be visible now', 'success');
+
+      filterApplied = true;
+    }
+
+    function clearFilter() {
+      if (!veltInitialized) {
+        log('Please login first', 'warn');
+        return;
+      }
+
+      const commentElement = window.Velt.getCommentElement();
+      if (!commentElement) {
+        log('Comment element not available', 'error');
+        return;
+      }
+
+      // Clear sidebar filters
+      commentElement.setCommentSidebarFilters({});
+
+      // Disable filterCommentsOnDom
+      commentElement.disableFilterCommentsOnDom();
+
+      log('Filters cleared - all comments are now visible', 'success');
+
+      filterApplied = false;
+    }
+
+    // ──────────────────────────────────────────
+    // Init
+    // ──────────────────────────────────────────
+    populateDropdowns();
+    renderUserGrid();
+  </script>
+</body>
+
+</html>
