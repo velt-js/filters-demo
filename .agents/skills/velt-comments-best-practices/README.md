@@ -125,8 +125,8 @@ Additional context or variations.
 ## Source Documentation
 
 All technical claims must be backed by:
-- **Primary**: `/Users/yoenzhang/Downloads/docs` (Velt official docs)
-- **Secondary**: `/Users/yoenzhang/Downloads/sample-apps/apps/react/comments` (Working demos)
+- **Primary**: [Velt official docs](https://docs.velt.dev)
+- **Secondary**: [Velt sample apps](https://github.com/velt-js/velt-docs-sample-apps) (Working demos)
 
 Include source pointers in every rule file.
 

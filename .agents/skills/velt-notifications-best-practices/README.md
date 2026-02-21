@@ -123,7 +123,7 @@ Additional context or variations.
 ## Source Documentation
 
 All technical claims must be backed by:
-- **Primary**: `/Users/yoenzhang/Downloads/docs` (Velt official docs)
+- **Primary**: [Velt official docs](https://docs.velt.dev)
 - **Secondary**: Velt sample apps and console
 
 Include source pointers in every rule file.
