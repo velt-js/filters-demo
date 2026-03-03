@@ -8,7 +8,7 @@
     "start": "next start"
   },
   "dependencies": {
-    "@veltdev/react": "latest",
+    "@veltdev/react": "^5.0.2-beta.5",
     "next": "^15",
     "react": "^19",
     "react-dom": "^19"

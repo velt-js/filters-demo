@@ -3,7 +3,9 @@ import './globals.css';
 
 const poppins = Poppins({
   subsets: ['latin'],
-  weight: ['300', '400', '500', '600'],
+  weight: ['400', '600'],
+  display: 'swap',
+  preload: false,
 });
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
