@@ -55,19 +55,13 @@ function FilterControls({ loggedIn, currentUser, onLog }: {
   onLog: (msg: string, type: LogEntry['type']) => void;
 }) {
   const { client } = useVeltClient();
-  const [filterApplied, setFilterApplied] = useState(false);
+  const hasApplied = useRef(false);
 
-  const applyUserFilter = () => {
-    if (!loggedIn || !client) {
-      onLog('Please login first', 'warn');
-      return;
-    }
+  useEffect(() => {
+    if (!client || !loggedIn || hasApplied.current) return;
 
     const commentElement = client.getCommentElement();
-    if (!commentElement) {
-      onLog('Comment element not available', 'error');
-      return;
-    }
+    if (!commentElement) return;
 
     commentElement.openCommentSidebar();
     onLog('Sidebar opened (required for DOM filtering to work)', 'info');
@@ -89,8 +83,8 @@ function FilterControls({ loggedIn, currentUser, onLog }: {
     onLog('filterCommentsOnDom enabled - DOM now synced with sidebar filter', 'success');
     onLog('Only comments from user-1 through user-5 should be visible now', 'success');
 
-    setFilterApplied(true);
-  };
+    hasApplied.current = true;
+  }, [client, loggedIn]);
 
   const clearFilter = () => {
     if (!loggedIn || !client) {
@@ -107,18 +101,12 @@ function FilterControls({ loggedIn, currentUser, onLog }: {
     commentElement.setCommentSidebarFilters({});
     commentElement.disableFilterCommentsOnDom();
     onLog('Filters cleared - all comments are now visible', 'success');
-    setFilterApplied(false);
   };
 
   return (
-    <>
-      <button className="header-button" disabled={!loggedIn} onClick={applyUserFilter}>
-        Apply Filter (5 users)
-      </button>
-      <button className="header-button danger" disabled={!loggedIn} onClick={clearFilter}>
-        Clear Filter
-      </button>
-    </>
+    <button className="header-button danger" disabled={!loggedIn} onClick={clearFilter}>
+      Clear Filter
+    </button>
   );
 }
 
@@ -129,8 +117,8 @@ function FilterControls({ loggedIn, currentUser, onLog }: {
 // No JWT / generateToken for this demo.
 // ──────────────────────────────────────────
 export default function Home() {
-  const [loggedInUser, setLoggedInUser] = useState<typeof ALL_USERS[number] | null>(null);
-  const [showModal, setShowModal] = useState(true);
+  const [loggedInUser, setLoggedInUser] = useState<typeof ALL_USERS[number] | null>(ALL_USERS[0]);
+  const [showModal, setShowModal] = useState(false);
   const [selectedUserId, setSelectedUserId] = useState('');
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const logRef = useRef<HTMLDivElement>(null);
@@ -140,7 +128,7 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    log('Ready. Please login to start.', 'info');
+    log(`Auto-logged in as ${ALL_USERS[0].name} (${ALL_USERS[0].userId})`, 'success');
   }, [log]);
 
   useEffect(() => {
@@ -246,7 +234,7 @@ export default function Home() {
               <div className="panel-title">All 10 Users (each adds a comment)</div>
               <div className="panel-description">
                 Green = included in filter (5 users) | Red = excluded from filter (5 users).
-                After login, click &quot;Apply Filter&quot; to filter comments by the green users plus yourself.
+                After login, filters are automatically applied to show only comments from the green users plus yourself.
               </div>
               <div className="user-grid">
                 {ALL_USERS.map(user => {
@@ -274,8 +262,8 @@ export default function Home() {
                 <VeltCommentTool targetCommentElementId="commentArea" />
                 <p><strong>How to test:</strong></p>
                 <p>1. Login as each of the 10 users (one at a time) and leave a comment on this area.</p>
-                <p>2. After all 10 users have commented, login as any user and click &quot;Apply Filter&quot;.</p>
-                <p>3. Comments from the 5 filtered users (user-1 through user-5) plus your own will be visible.</p>
+                <p>2. After all 10 users have commented, login as any user - filters are applied automatically.</p>
+                <p>3. Comments from the 5 filtered users (user-1 through user-5) plus your own will be visible automatically.</p>
                 <p>4. Click &quot;Clear Filter&quot; to show all comments again.</p>
                 <p>&nbsp;</p>
                 <p>The filter uses two mechanisms together:</p>
