@@ -14,10 +14,7 @@ export function Header({ isLoggedIn, currentUser, onLoginClick }: HeaderProps) {
     <div className="header-bar">
       <div className="header-title">Comment User Filter Demo</div>
       <div className="header-actions">
-        <CommentFilter
-          isLoggedIn={isLoggedIn}
-          currentUser={currentUser}
-        />
+        <CommentFilter />
         <button className="header-button" onClick={onLoginClick}>
           Login
         </button>

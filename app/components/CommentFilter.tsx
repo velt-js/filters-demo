@@ -11,40 +11,30 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { useVeltClient } from '@veltdev/react';
-import { User } from '../types';
+import { useVeltClient, useCurrentUser } from '@veltdev/react';
 import { FILTERED_USERS } from '../constants';
 
-interface CommentFilterProps {
-  isLoggedIn: boolean;
-  currentUser: User | null;
-}
-
-export function CommentFilter({ isLoggedIn, currentUser }: CommentFilterProps) {
+export function CommentFilter() {
   const { client } = useVeltClient();
+  const currentUser = useCurrentUser();
   const hasAppliedFilter = useRef(false);
+
+  const isLoggedIn = !!currentUser;
 
   // Apply filters automatically when user logs in
   useEffect(() => {
-    if (!client || !isLoggedIn || hasAppliedFilter.current) return;
+    if (!client || !currentUser || hasAppliedFilter.current) return;
 
     const commentElement = client.getCommentElement();
     if (!commentElement) return;
 
-    // Step 1: Open sidebar (required for DOM filtering to work)
-    commentElement.openCommentSidebar();
-
-    // Step 2: Build the people filter array
-    const baseFilter = FILTERED_USERS.map((user) => ({
-      userId: user.userId,
-      email: user.email,
-      name: user.name,
-    }));
+    // Step 2: Build the people filter array (only userId is needed)
+    const baseFilter = FILTERED_USERS.map((user) => ({ userId: user.userId }));
 
     // Include current user in filter if not already in the list
-    const isCurrentUserInFilter = currentUser && baseFilter.some((u) => u.userId === currentUser.userId);
-    const peopleFilter = !isCurrentUserInFilter && currentUser
-      ? [...baseFilter, { userId: currentUser.userId, email: currentUser.email, name: currentUser.name }]
+    const isCurrentUserInFilter = baseFilter.some((u) => u.userId === currentUser.userId);
+    const peopleFilter = !isCurrentUserInFilter
+      ? [...baseFilter, { userId: currentUser.userId }]
       : baseFilter;
 
     // Step 3: Apply the sidebar filter
@@ -55,7 +45,7 @@ export function CommentFilter({ isLoggedIn, currentUser }: CommentFilterProps) {
     commentElement.enableFilterCommentsOnDom();
 
     hasAppliedFilter.current = true;
-  }, [client, isLoggedIn, currentUser]);
+  }, [client, currentUser]);
 
   // Clear all filters
   const handleClearFilters = () => {
