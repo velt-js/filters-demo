@@ -56,9 +56,6 @@ export function CommentFilter() {
 
     // Clear sidebar filters
     commentElement.setCommentSidebarFilters({});
-
-    // Disable DOM filtering
-    commentElement.disableFilterCommentsOnDom();
   };
 
   return (
